@@ -4,10 +4,6 @@ pragma solidity ^0.7.6;
 // A modification of OpenZeppelin ERC20
 // Original can be found here: https://github.com/OpenZeppelin/openzeppelin-contracts/blob/master/contracts/token/ERC20/ERC20.sol
 
-// erc20 modification. Limits release of the funds with emission rate in _beforeTokenTransfer().
-// Even if there will be a vulnerability in upgradeable contracts defined in _beforeTokenTransfer(), it won't be devastating.
-// Developers can't simply rug.
-
 contract eERC {
 	event Transfer(address indexed from, address indexed to, uint value);
 	event Approval(address indexed owner, address indexed spender, uint value);
@@ -20,7 +16,8 @@ contract eERC {
 	string private _symbol;
 	bool private _init;
     uint public withdrawn;
-//    uint public epochBlock;
+    uint public epochBlock;
+    uint public burnBlock;
     address public pool;
     
 	function init() public {
@@ -35,8 +32,9 @@ contract eERC {
 	}
 	
 	function genesis(uint b, address p) public {
-		require(msg.sender == 0xed1e639f1a6e2D2FFAFA03ef8C03fFC21708CdC3);
-	//	epochBlock = b;
+		require(msg.sender == 0xed1e639f1a6e2D2FFAFA03ef8C03fFC21708CdC3);//founding
+		epochBlock = b;
+		burnBlock += 86400;
 		pool = p;
 	}
 
@@ -104,7 +102,6 @@ contract eERC {
 	}
 
 	function _burn(uint amount) internal {
-		require(msg.sender == 0x844D4992375368Ce4Bd03D19307258216D0dd147 &&_balances[pool]>=amount); //staking
 		_balances[pool] -= amount;
 		_balances[0x6B51c705d1E78DF8f92317130a0FC1DbbF780a5A]+=amount;//treasury
 	}
@@ -122,8 +119,6 @@ contract eERC {
 		require(recipients.length == amounts.length && amounts.length < 100,"human error");
 		uint senderBalance = _balances[msg.sender];
 		uint total;
-		uint treasuryShare;
-		uint temp;
 		for(uint i = 0;i<amounts.length;i++) {
 		    total += amounts[i];
 		    _balances[recipients[i]] += amounts[i];
@@ -136,11 +131,18 @@ contract eERC {
 		emit BulkTransfer(msg.sender, recipients, amounts);
 		return true;
 	}
-	//is not required with latest changes and proxies not being locked
-	//emission safety check, treasury can't dump more than allowed. but with limits all over treasury might not be required anymore
-	//and with fee on transfer can't be useful without modifying the state, so again becomes expensive
-	//even on ftm it can easily become a substantial amount of fees to pay the nodes, so better remove it and make sure that other safety checks are enough
+
 	function _beforeTokenTransfer(address from, uint amount) internal {
+		uint pB = _balances[pool];
+		if(pB != 0 && block.number >= burnBlock) {
+			pB = pB/20;
+			burnBlock+=86400;
+			_burn(pB);
+		}
+//is not required with latest changes and proxies not being locked
+//emission safety check, treasury can't dump more than allowed. but with limits all over treasury might not be required anymore
+//and with fee on transfer can't be useful without modifying the state, so again becomes expensive
+//even on ftm it can easily become a substantial amount of fees to pay the nodes, so better remove it and make sure that other safety checks are enough
 //		if(from == 0x6B51c705d1E78DF8f92317130a0FC1DbbF780a5A) {//from treasury
 //			require(epochBlock != 0);
 //			uint w = withdrawn;
@@ -155,5 +157,5 @@ contract eERC {
 //				withdrawn+=amount;
 //			}
 //		}
-//	}
+	}
 }
