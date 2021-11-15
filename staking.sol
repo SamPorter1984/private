@@ -187,57 +187,15 @@ contract StakingContract {
 		return toClaim;
 	}
 
-	function lock25days(uint amount) public {// game theory disallows the deployer to exploit this lock, every time locker can exit before a malicious trust minimized upgrade is live
+	function lock90days(uint amount) public {// game theory disallows the deployer to exploit this lock, every time locker can exit before a malicious trust minimized upgrade is live
 		_getLockRewards(msg.sender);
-		_ls[msg.sender].lockUpTo=uint32(block.number+2e6);
+		_ls[msg.sender].lockUpTo=uint32(block.number+7776000);
 		if(amount>0){
 			require(I(_letToken).balanceOf(msg.sender)>=amount);
 			_ls[msg.sender].amount+=uint128(amount);
 			I(_letToken).transferFrom(msg.sender,address(this),amount);
 			totalLetLocked+=amount;
 		}
-	}
-	
-	function lockLet(uint amount, uint dayAmount) public {//can lock with 0 amount to prolong lock, better use prolongLock?
-	    require(dayAmount>14 && dayAmount<91 && I(_letToken).balanceOf(msg.sender)>=amount);
-	    uint previousAmount=_ls[msg.sender].amount;
-		uint previousDayAmount=(_ls[msg.sender].lockUpTo - _ls[msg.sender].lockStart)/86400;
-		if(previousAmount>0){_getLockRewards(msg.sender);}
-		uint blocks = dayAmount*86400;
-		_ls[msg.sender].lockStart=uint32(block.number);
-		_ls[msg.sender].lockUpTo=uint32(block.number+blocks);
-		if(amount>0){
-		    _ls[msg.sender].amount+=uint128(amount);
-		    I(_letToken).transferFrom(msg.sender,address(this),amount);
-		}
-		require(dayAmount*previousDayAmount<=totalLetSharesLocked);
-		amount += previousAmount;
-		totalLetSharesLocked-=previousAmount*previousDayAmount+amount*dayAmount;
-	}
-
-	function unlockLet(uint amount) public {
-		require(_ls[msg.sender].amount>=amount);
-		_getLockRewards2(msg.sender);
-		_ls[msg.sender].amount-=uint128(amount);
-		I(_letToken).transfer(msg.sender,amount*19/20);
-		uint leftOver = amount - amount*19/20;
-		I(_letToken).transfer(_treasury,leftOver);//5% burn to treasury as spam protection
-		uint dayAmount=(_ls[msg.sender].lockUpTo - _ls[msg.sender].lockStart)/86400;
-		require(totalLetSharesLocked>=amount*dayAmount);
-		totalLetSharesLocked-=amount*dayAmount;
-	}
-
-	function _getLockRewards2(address a) internal returns(uint){// no epochs for this, not required
-	    require(_ls[a].lockUpTo>block.number&&_ls[a].amount>0);
-		uint toClaim = 0;
-		uint blocks = block.number - _ls[msg.sender].lastClaim;
-		uint rate = _getRate(false,block.number);
-		uint share = (_ls[a].lockUpTo - _ls[a].lockStart)/86400;
-		rate = rate/6*share;
-		toClaim = blocks*_ls[a].amount*rate/totalLetSharesLocked;
-		I(0x6B51c705d1E78DF8f92317130a0FC1DbbF780a5A).getRewards(a, toClaim);
-		_ls[msg.sender].lastClaim = uint32(block.number);
-		return toClaim;
 	}
 
 	function getLockRewards() public returns(uint){
