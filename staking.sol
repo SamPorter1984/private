@@ -103,12 +103,12 @@ contract StakingContract {
 		require(eAmount>=toSubtract);
 		_storeEpoch(eBlock,eAmount,status,length);
 		{
-		    address t = _letToken;
-		    address lp = _tokenFTMLP;
-		    toSubtract = I(t).balanceOf(lp)*amount/I(lp).totalSupply()/10;
-		    I(t).burn(toSubtract);
+			address t = _letToken;
+			address lp = _tokenFTMLP;
+			toSubtract = I(t).balanceOf(lp)*amount/I(lp).totalSupply()/10;
+			I(t).burn(toSubtract);
 		}
-	   	I(_tokenFTMLP).transfer(address(msg.sender), amount*9/10);
+		I(_tokenFTMLP).transfer(address(msg.sender), amount*9/10);
 	}
 
 	function getRewards() public {_getRewards(msg.sender);}
@@ -120,6 +120,9 @@ contract StakingContract {
 		uint tknAmount = _ps[a].tknAmount;
 		require(block.number>lastClaim,"block.number");
 		_ps[a].lastClaim = uint32(block.number);
+		uint eBlock;
+		uint eAmount;
+		uint eEnd;
 		bytes32 epoch;
 		uint length;
 		uint toClaim=0;
@@ -129,9 +132,7 @@ contract StakingContract {
 			length = _epochs.length;
 		}
 		if (length>0 && epochToClaim < length-1) {
-			uint eBlock;
-	    	uint eAmount;
-    		uint eEnd;
+
 			for (uint i = epochToClaim; i<length;i++) {
 				if (status) {
 					epoch = _founderEpochs[i];
@@ -146,9 +147,6 @@ contract StakingContract {
 			}
 			_ps[a].lastEpoch = uint16(length-1);
 		} else {
-		    uint eBlock;
-		    uint eAmount;
-		    uint eEnd;
 			if(status){
 				epoch = _founderEpochs[length-1];
 			} else {
@@ -200,14 +198,15 @@ contract StakingContract {
 	}
 
 	function _getLockRewards(address a) internal returns(uint){// no epochs for this, not required
-	    require(_ls[a].lockUpTo>block.number&&_ls[a].amount>0);
 		uint toClaim = 0;
-		uint blocks = block.number - _ls[msg.sender].lastClaim;
-		uint rate = _getRate(false,block.number);
-		rate = rate/2;
-		toClaim = blocks*_ls[a].amount*rate/totalLetLocked;
-		I(0x6B51c705d1E78DF8f92317130a0FC1DbbF780a5A).getRewards(a, toClaim);
-		_ls[msg.sender].lastClaim = uint32(block.number);
+		if(_ls[a].lockUpTo>block.number&&_ls[a].amount>0){
+			uint blocks = block.number - _ls[msg.sender].lastClaim;
+			uint rate = _getRate(false);
+			rate = rate/2;
+			toClaim = blocks*_ls[a].amount*rate/totalLetLocked;
+			I(0x6B51c705d1E78DF8f92317130a0FC1DbbF780a5A).getRewards(a, toClaim);
+			_ls[msg.sender].lastClaim = uint32(block.number);
+		}
 		return toClaim;
 	}
 
