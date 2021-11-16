@@ -21,7 +21,6 @@ contract StakingContract {
 	address private _letToken;
 	address private _treasury;
 	uint public totalLetLocked;
-	uint public totalLetSharesLocked;
 
 	struct LPProvider {
 		uint32 lastClaim;
@@ -36,7 +35,6 @@ contract StakingContract {
 	struct TokenLocker {
 		uint128 amount;
 		uint32 lastClaim;
-		uint32 lockStart;
 		uint32 lockUpTo;
 	}
 
@@ -53,7 +51,7 @@ contract StakingContract {
 	}
 
 	function genesis(uint foundingFTM, address tkn, uint gen,uint startingSupply) public {
-		require(msg.sender == _foundingEvent/* ||msg.sender == 0x5C8403A2617aca5C86946E32E14148776E37f72A*/);
+		require(msg.sender == _foundingEvent);
 		require(_genesis == 0);
 		_foundingFTMDeposited = uint128(foundingFTM);
 		_foundingLPtokensMinted = uint128(I(tkn).balanceOf(address(this)));
@@ -111,7 +109,6 @@ contract StakingContract {
 		    I(t).burn(toSubtract);
 		}
 	   	I(_tokenFTMLP).transfer(address(msg.sender), amount*9/10);
-    	//I(_tokenFTMLP).transfer(address(0x000000000000000000000000000000000000dEaD), amount*10/91);//solves nothing
 	}
 
 	function getRewards() public {_getRewards(msg.sender);}
@@ -187,9 +184,9 @@ contract StakingContract {
 		return toClaim;
 	}
 
-	function lock90days(uint amount) public {// game theory disallows the deployer to exploit this lock, every time locker can exit before a malicious trust minimized upgrade is live
+	function lock25days(uint amount) public {// game theory disallows the deployer to exploit this lock, every time locker can exit before a malicious trust minimized upgrade is live
 		_getLockRewards(msg.sender);
-		_ls[msg.sender].lockUpTo=uint32(block.number+7776000);
+		_ls[msg.sender].lockUpTo=uint32(block.number+2e6);
 		if(amount>0){
 			require(I(_letToken).balanceOf(msg.sender)>=amount);
 			_ls[msg.sender].amount+=uint128(amount);
