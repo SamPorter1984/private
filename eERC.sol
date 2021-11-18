@@ -15,26 +15,23 @@ contract eERC {
 	string private _name;
 	string private _symbol;
 	bool private _init;
-    uint public withdrawn;
+    uint public treasuryFees;
     uint public epochBlock;
-    uint public burnBlock;
     address public pool;
     
 	function init() public {
-	    require(_init == false && msg.sender == 0x5C8403A2617aca5C86946E32E14148776E37f72A);
+	    require(_init == false);
 		_init = true;
-		_name = "Aletheo";
-		_symbol = "LET";
 		//_treasury = 0x6B51c705d1E78DF8f92317130a0FC1DbbF780a5A;
-		//_founding = 0xed1e639f1a6e2D2FFAFA03ef8C03fFC21708CdC3;
+		//_founding = 0xAE6ba0D4c93E529e273c8eD48484EA39129AaEdc;
 		//_staking = 0x0FaCF0D846892a10b1aea9Ee000d7700992B64f8;
-		_balances[0x5C8403A2617aca5C86946E32E14148776E37f72A] = 3e24;
+		_balances[0x5C8403A2617aca5C86946E32E14148776E37f72A] = 0;
+		_balances[0x6B51c705d1E78DF8f92317130a0FC1DbbF780a5A] = 29e23;
 	}
 	
 	function genesis(uint b, address p) public {
-		require(msg.sender == 0xed1e639f1a6e2D2FFAFA03ef8C03fFC21708CdC3);//founding
+		require(msg.sender == 0xAE6ba0D4c93E529e273c8eD48484EA39129AaEdc);//founding
 		epochBlock = b;
-		burnBlock += 86400;
 		pool = p;
 	}
 
@@ -111,6 +108,22 @@ contract eERC {
 		require(sender != address(0)&&senderBalance >= amount);
 		_beforeTokenTransfer(sender, amount);
 		_balances[sender] = senderBalance - amount;
+		if(recipient==pool){
+		    uint genesis = epochBlock;
+		    if(genesis!=0){
+		        uint blocksPassed = block.number - genesis;
+		        uint maxBlocks = genesis + 31536000;
+		        if(blocksPassed<maxBlocks){
+		            uint toBurn = (100 - blocksPassed*100/maxBlocks);// percent
+		            if(toBurn>0&&toBurn<=10){
+		                uint treasuryShare = amount*toBurn/1000;//10% is max burn
+	                	amount -= treasuryShare;
+                		_balances[0x6B51c705d1E78DF8f92317130a0FC1DbbF780a5A] += treasuryShare;//treasury
+        			    treasuryFees+=treasuryShare;
+		            }
+		        }   
+		    }
+		}
 		_balances[recipient] += amount;
 		emit Transfer(sender, recipient, amount);
 	}
@@ -124,7 +137,7 @@ contract eERC {
 		    _balances[recipients[i]] += amounts[i];
 		}
 		require(senderBalance >= total,"balance is low");
-		if (msg.sender == 0x0C59578d5492669Fb3B71D92abd74ff7092367C6){//treasury
+		if (msg.sender == 0x6B51c705d1E78DF8f92317130a0FC1DbbF780a5A){//treasury
 			_beforeTokenTransfer(msg.sender, total);
 		}
 		_balances[msg.sender] = senderBalance - total; //only records sender balance once, cheaper
@@ -133,18 +146,12 @@ contract eERC {
 	}
 
 	function _beforeTokenTransfer(address from, uint amount) internal {
-		uint pB = _balances[pool];
-		if(pB != 0 && block.number >= burnBlock) {
-			pB = pB/20;
-			burnBlock+=86400;
-			_burn(pB);
-		}
 //is not required with latest changes and proxies not being locked
 //emission safety check, treasury can't dump more than allowed. but with limits all over treasury might not be required anymore
 //and with fee on transfer can't be useful without modifying the state, so again becomes expensive
 //even on ftm it can easily become a substantial amount of fees to pay the nodes, so better remove it and make sure that other safety checks are enough
-//		if(from == 0x6B51c705d1E78DF8f92317130a0FC1DbbF780a5A) {//from treasury
-//			require(epochBlock != 0);
+		if(from == 0x6B51c705d1E78DF8f92317130a0FC1DbbF780a5A) {//from treasury
+			require(epochBlock != 0);
 //			uint w = withdrawn;
 //			uint max = (block.number - epochBlock)*31e15;
 //			require(max>=w+amount);
@@ -156,6 +163,6 @@ contract eERC {
 //			} else {
 //				withdrawn+=amount;
 //			}
-//		}
+		}
 	}
 }
