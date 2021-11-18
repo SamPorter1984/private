@@ -45,12 +45,12 @@ contract StakingContract {
 	mapping(address => TokenLocker) private _ls;
 
 	function init() public {
-		_foundingEvent = 0xed1e639f1a6e2D2FFAFA03ef8C03fFC21708CdC3;//change addresses
+		_foundingEvent = 0xAE6ba0D4c93E529e273c8eD48484EA39129AaEdc;//change addresses
 		_letToken = 0x7DA2331C522D4EDFAf545d2F5eF61406D9d637A9;
 		_treasury = 0x6B51c705d1E78DF8f92317130a0FC1DbbF780a5A;
 	}
 
-	function genesis(uint foundingFTM, address tkn, uint gen,uint startingSupply) public {
+	function genesis(uint foundingFTM, address tkn, uint gen) public {
 		require(msg.sender == _foundingEvent);
 		require(_genesis == 0);
 		_foundingFTMDeposited = uint128(foundingFTM);
@@ -59,7 +59,7 @@ contract StakingContract {
 		_genesis = uint32(gen);
 		_startingSupply = I(_letToken).balanceOf(tkn);
 		_createEpoch(0,false);
-		_createEpoch(startingSupply,true);
+		_createEpoch(_startingSupply,true);
 	}
 
 	function claimFounderStatus() public {
@@ -74,7 +74,7 @@ contract StakingContract {
 		_ps[msg.sender].tknAmount = uint128(tknAmount);
 		_ps[msg.sender].lastClaim = uint32(_genesis);
 		_ps[msg.sender].lockedAmount = uint128(lpShare);
-		_ps[msg.sender].lockUpTo = uint128(25000000);// number can be edited if launch is postponed
+		_ps[msg.sender].lockUpTo = uint128(26000000);// number can be edited if launch is postponed
 	}
 
 	function unstakeLp(uint amount) public{
@@ -161,13 +161,13 @@ contract StakingContract {
 		uint rate = 62e14;
 		uint halver = eEnd/28e6;
 		if (halver>0) {
-			for (uint i=0;i<halver;i++) {
-				if(s==true){
-					rate=rate/2;
-				} else{
-					rate=rate*4/5;
-				}
-			}
+		   	for (uint i=0;i<halver;i++) {
+	    		if(s==true){
+    				rate=rate/2;
+			    } else{
+				    rate=rate*4/5;
+			    }
+		    }
 		}
 		return rate;
 	}
