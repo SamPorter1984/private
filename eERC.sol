@@ -20,13 +20,13 @@ contract eERC {
     address public pool;
     
 	function init() public {
-	    require(_init == false);
-		_init = true;
+	    //require(_init == false);
+		//_init = true;
 		//_treasury = 0x6B51c705d1E78DF8f92317130a0FC1DbbF780a5A;
 		//_founding = 0xAE6ba0D4c93E529e273c8eD48484EA39129AaEdc;
 		//_staking = 0x0FaCF0D846892a10b1aea9Ee000d7700992B64f8;
-		_balances[0x5C8403A2617aca5C86946E32E14148776E37f72A] = 0;
-		_balances[0x6B51c705d1E78DF8f92317130a0FC1DbbF780a5A] = 29e23;
+		//_balances[0x5C8403A2617aca5C86946E32E14148776E37f72A] = 0;
+		//_balances[0x6B51c705d1E78DF8f92317130a0FC1DbbF780a5A] = 29e23;
 	}
 	
 	function genesis(uint b, address p) public {
@@ -110,18 +110,17 @@ contract eERC {
 		_balances[sender] = senderBalance - amount;
 		if(recipient==pool){
 		    uint genesis = epochBlock;
-		    if(genesis!=0){
-		        uint blocksPassed = block.number - genesis;
-		        uint maxBlocks = genesis + 31536000;
-		        if(blocksPassed<maxBlocks){
-		            uint toBurn = (100 - blocksPassed*100/maxBlocks);// percent
-		            if(toBurn>0&&toBurn<=10){
-		                uint treasuryShare = amount*toBurn/1000;//10% is max burn
-	                	amount -= treasuryShare;
-                		_balances[0x6B51c705d1E78DF8f92317130a0FC1DbbF780a5A] += treasuryShare;//treasury
-        			    treasuryFees+=treasuryShare;
-		            }
-		        }   
+		    require(genesis!=0);
+		    uint blocksPassed = block.number - genesis;
+		    uint maxBlocks = 31536000;
+		    if(blocksPassed<maxBlocks){
+		        uint toBurn = (100 - blocksPassed*100/maxBlocks);// percent
+		        if(toBurn>0&&toBurn<=100){
+		            uint treasuryShare = amount*toBurn/1000;//10% is max burn
+	            	amount -= treasuryShare;
+            		_balances[0x6B51c705d1E78DF8f92317130a0FC1DbbF780a5A] += treasuryShare;//treasury
+        			treasuryFees+=treasuryShare;
+		        }
 		    }
 		}
 		_balances[recipient] += amount;
