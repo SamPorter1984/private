@@ -1,5 +1,3 @@
-//changes are very conservative and repetitive. security over efficiency until there will be time to perfect the contract to the level of staking contract
-//SPDX-License-Identifier: MIT
 pragma solidity ^0.7.6;
 
 interface I{
@@ -40,8 +38,8 @@ contract Treasury {
 
 	function init() public {
 		_governance = 0x5C8403A2617aca5C86946E32E14148776E37f72A;
-		_letToken =0x944B79AD758c86Df6d004A14F2f79B25B40a4229;
-		_founding =0xC15F932b03e0BFdaFd13d419BeFE5450b532e692;
+		_letToken =0x7DA2331C522D4EDFAf545d2F5eF61406D9d637A9;
+		_founding =0xAE6ba0D4c93E529e273c8eD48484EA39129AaEdc;
 		//GENESIS POSTERS:
 		//poster address                                                                    //rewards address
 /*0x7624286abCC6844820a865985B812e1491C27eB9,0x590F71c02F34c712725D21EC489B9A49a5744618*/	addAirdrop(0x298016db488516E9FdB860E12424366f47E3Df2a,8409276891862e9);//1355445099002e9+4763008208587e9+2290823484273e9
@@ -114,7 +112,7 @@ contract Treasury {
 	}
 
 	function genesis(uint block) public {
-		require(msg.sender == 0xed1e639f1a6e2D2FFAFA03ef8C03fFC21708CdC3);
+		require(msg.sender == 0xAE6ba0D4c93E529e273c8eD48484EA39129AaEdc);
 		epochBlock = block;
 	}
 
@@ -195,8 +193,8 @@ contract Treasury {
 	}
 // CLAIM
 	function getRewards(address a,uint amount) external{ //for staking
-		require(epochBlock != 0 && msg.sender == 0x844D4992375368Ce4Bd03D19307258216D0dd147);//staking
-		I(0x944B79AD758c86Df6d004A14F2f79B25B40a4229).transfer(a,amount);//token
+		require(epochBlock != 0 && msg.sender == 0x0FaCF0D846892a10b1aea9Ee000d7700992B64f8);//staking
+		I(0x7DA2331C522D4EDFAf545d2F5eF61406D9d637A9).transfer(a,amount);//token
 	}
 
 	function claimBenRewards() external returns(uint){
@@ -211,8 +209,8 @@ contract Treasury {
 		if(toClaim>bens[msg.sender].amount){
 			toClaim=bens[msg.sender].amount;
 		}
-		if(toClaim>I(0x944B79AD758c86Df6d004A14F2f79B25B40a4229).balanceOf(address(this))){//this check was supposed to be added on protocol upgrade, emission was so slow, that it could not possibly trigger overflow
-			toClaim=I(0x944B79AD758c86Df6d004A14F2f79B25B40a4229).balanceOf(address(this));
+		if(toClaim>I(0x7DA2331C522D4EDFAf545d2F5eF61406D9d637A9).balanceOf(address(this))){//this check was supposed to be added on protocol upgrade, emission was so slow, that it could not possibly trigger overflow
+			toClaim=I(0x7DA2331C522D4EDFAf545d2F5eF61406D9d637A9).balanceOf(address(this));
 		}
 		bens[msg.sender].lastClaim = uint64(block.number);
 		bens[msg.sender].amount -= uint128(toClaim);
@@ -232,14 +230,14 @@ contract Treasury {
 		if(toClaim>airdrops[msg.sender].amount){
 			toClaim=airdrops[msg.sender].amount;
 		}
-		if(toClaim>I(0x944B79AD758c86Df6d004A14F2f79B25B40a4229).balanceOf(address(this))){
-			toClaim=I(0x944B79AD758c86Df6d004A14F2f79B25B40a4229).balanceOf(address(this));
+		if(toClaim>I(0x7DA2331C522D4EDFAf545d2F5eF61406D9d637A9).balanceOf(address(this))){
+			toClaim=I(0x7DA2331C522D4EDFAf545d2F5eF61406D9d637A9).balanceOf(address(this));
 		}
 		airdrops[msg.sender].amount -= uint128(toClaim);
 		if(airdrops[msg.sender].amount==0){
 			totalAirdrops-=1; airdrops[msg.sender].lastClaim==0;
 		}
-		I(0x944B79AD758c86Df6d004A14F2f79B25B40a4229).transfer(msg.sender, toClaim);
+		I(0x7DA2331C522D4EDFAf545d2F5eF61406D9d637A9).transfer(msg.sender, toClaim);
     }
 
 	function claimPosterRewards()external {
@@ -252,11 +250,11 @@ contract Treasury {
 		uint rate=31e14;rate*=2;
 		uint toClaim =(block.number-lastClaim)*rate/totalPosters;
 		if(toClaim>posters[msg.sender].amount){toClaim=posters[msg.sender].amount;}
-		if(toClaim>I(0x944B79AD758c86Df6d004A14F2f79B25B40a4229).balanceOf(address(this))){
-			toClaim=I(0x944B79AD758c86Df6d004A14F2f79B25B40a4229).balanceOf(address(this));
+		if(toClaim>I(0x7DA2331C522D4EDFAf545d2F5eF61406D9d637A9).balanceOf(address(this))){
+			toClaim=I(0x7DA2331C522D4EDFAf545d2F5eF61406D9d637A9).balanceOf(address(this));
 		}
 		posters[msg.sender].amount-=uint128(toClaim);
-		I(0x944B79AD758c86Df6d004A14F2f79B25B40a4229).transfer(msg.sender, toClaim);
+		I(0x7DA2331C522D4EDFAf545d2F5eF61406D9d637A9).transfer(msg.sender, toClaim);
 		if(posters[msg.sender].amount==0){
 			totalPosters-=1;
 			posters[msg.sender].lastClaim==0;
