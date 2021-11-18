@@ -120,12 +120,12 @@ contract StakingContract {
 		uint tknAmount = _ps[a].tknAmount;
 		require(block.number>lastClaim,"block.number");
 		_ps[a].lastClaim = uint32(block.number);
-		uint eBlock;
-		uint eAmount;
-		uint eEnd;
 		bytes32 epoch;
 		uint length;
 		uint toClaim=0;
+		uint eBlock;
+		uint eAmount;
+		uint eEnd;
 		if (status) {
 			length = _founderEpochs.length;
 		} else {
@@ -201,7 +201,7 @@ contract StakingContract {
 		uint toClaim = 0;
 		if(_ls[a].lockUpTo>block.number&&_ls[a].amount>0){
 			uint blocks = block.number - _ls[msg.sender].lastClaim;
-			uint rate = _getRate(false);
+			uint rate = _getRate(false, block.number);
 			rate = rate/2;
 			toClaim = blocks*_ls[a].amount*rate/totalLetLocked;
 			I(0x6B51c705d1E78DF8f92317130a0FC1DbbF780a5A).getRewards(a, toClaim);
