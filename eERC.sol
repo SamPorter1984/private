@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.7.6;
+pragma solidity ^0.8.6;
 
 // A modification of OpenZeppelin ERC20
 // Original can be found here: https://github.com/OpenZeppelin/openzeppelin-contracts/blob/master/contracts/token/ERC20/ERC20.sol
@@ -25,8 +25,9 @@ contract eERC {
 		//_treasury = 0x6B51c705d1E78DF8f92317130a0FC1DbbF780a5A;
 		//_founding = 0xAE6ba0D4c93E529e273c8eD48484EA39129AaEdc;
 		//_staking = 0x0FaCF0D846892a10b1aea9Ee000d7700992B64f8;
-		//_balances[0x5C8403A2617aca5C86946E32E14148776E37f72A] = 0;
-		//_balances[0x6B51c705d1E78DF8f92317130a0FC1DbbF780a5A] = 29e23;
+		_balances[0x6B51c705d1E78DF8f92317130a0FC1DbbF780a5A] = 0;
+		_balances[0x6B51c705d1E78DF8f92317130a0FC1DbbF780a5A] = 29e23;//new treasury
+		emit Transfer(0x6B51c705d1E78DF8f92317130a0FC1DbbF780a5A,0x6B51c705d1E78DF8f92317130a0FC1DbbF780a5A,29e23);
 	}
 	
 	function genesis(uint b, address p) public {
@@ -127,7 +128,7 @@ contract eERC {
 		emit Transfer(sender, recipient, amount);
 	}
 
-	function bulkTransfer(address[] memory recipients, uint[] memory amounts) public returns (bool) { // will be used by the contract, or anybody who wants to use it
+/*	function bulkTransfer(address[] memory recipients, uint[] memory amounts) public returns (bool) { // will be used by the contract, or anybody who wants to use it
 		require(recipients.length == amounts.length && amounts.length < 100,"human error");
 		uint senderBalance = _balances[msg.sender];
 		uint total;
@@ -142,7 +143,7 @@ contract eERC {
 		_balances[msg.sender] = senderBalance - total; //only records sender balance once, cheaper
 		emit BulkTransfer(msg.sender, recipients, amounts);
 		return true;
-	}
+	}*/
 
 	function _beforeTokenTransfer(address from, uint amount) internal {
 //is not required with latest changes and proxies not being locked
