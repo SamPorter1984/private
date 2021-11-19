@@ -24,8 +24,8 @@ contract FoundingEvent {
 
 	function init() external {
 		_deployer = 0x5C8403A2617aca5C86946E32E14148776E37f72A;
-		_letToken=0x7DA2331C522D4EDFAf545d2F5eF61406D9d637A9;
-		_treasury=0x6B51c705d1E78DF8f92317130a0FC1DbbF780a5A;//change
+		//_letToken=0x7DA2331C522D4EDFAf545d2F5eF61406D9d637A9;
+		_treasury=0xeece0f26876a9b5104fEAEe1CE107837f96378F2;//change
 	}
 
 	function startLGE(uint hc) external {
@@ -98,6 +98,7 @@ contract FoundingEvent {
 		require(_emergency == true && deposits[msg.sender]>0 && _lock!=1);
 		_lock=1;
 		payable(msg.sender).transfer(deposits[msg.sender]);
+		delete deposits[msg.sender];
 		_lock=0;
 	}
 
