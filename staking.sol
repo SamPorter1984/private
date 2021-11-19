@@ -46,7 +46,7 @@ contract StakingContract {
 	function init() public {
 		//_foundingEvent = 0xAE6ba0D4c93E529e273c8eD48484EA39129AaEdc;
 		//_letToken = 0x7DA2331C522D4EDFAf545d2F5eF61406D9d637A9;
-		_treasury = 0x6B51c705d1E78DF8f92317130a0FC1DbbF780a5A;//change
+		_treasury = 0xeece0f26876a9b5104fEAEe1CE107837f96378F2;
 	}
 
 	function genesis(uint foundingFTM, address tkn, uint gen) public {
