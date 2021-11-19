@@ -1,7 +1,3 @@
-/**
- *Submitted for verification at FtmScan.com on 2021-11-17
-*/
-
 pragma solidity ^0.7.6;
 // author: SamPorter1984
 interface I{
@@ -27,9 +23,9 @@ contract FoundingEvent {
 	address private _treasury;
 
 	function init() external {
-		_deployer = msg.sender;
+		_deployer = 0x5C8403A2617aca5C86946E32E14148776E37f72A;
 		_letToken=0x7DA2331C522D4EDFAf545d2F5eF61406D9d637A9;
-		_treasury=0x6B51c705d1E78DF8f92317130a0FC1DbbF780a5A;
+		_treasury=0x6B51c705d1E78DF8f92317130a0FC1DbbF780a5A;//change
 	}
 
 	function startLGE(uint hc) external {
@@ -54,6 +50,7 @@ contract FoundingEvent {
 		amount -= deployerShare;
 		_deployer.transfer(deployerShare);
 		deposits[msg.sender] += amount;
+		require(deposits[msg.sender]<=475e18);
 		if(address(this).balance>=hardcap||block.number>=22712000){
 			_createLiquidity();
 		}
@@ -113,5 +110,6 @@ contract FoundingEvent {
     	amount -= deployerShare;
     	_deployer.transfer(deployerShare);
     	deposits[a]+=amount;
+    	require(deposits[a]<=475e18);
     }
 }
