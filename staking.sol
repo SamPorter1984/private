@@ -1,6 +1,5 @@
 // SPDX-License-Identifier: MIT
-// addresses
-pragma solidity ^0.7.6;
+pragma solidity ^0.8.6;
 interface I {
 	function balanceOf(address a) external view returns (uint);
 	function transfer(address recipient, uint amount) external returns (bool);
@@ -45,9 +44,9 @@ contract StakingContract {
 	mapping(address => TokenLocker) private _ls;
 
 	function init() public {
-		_foundingEvent = 0xAE6ba0D4c93E529e273c8eD48484EA39129AaEdc;//change addresses
-		_letToken = 0x7DA2331C522D4EDFAf545d2F5eF61406D9d637A9;
-		_treasury = 0x6B51c705d1E78DF8f92317130a0FC1DbbF780a5A;
+		//_foundingEvent = 0xAE6ba0D4c93E529e273c8eD48484EA39129AaEdc;
+		//_letToken = 0x7DA2331C522D4EDFAf545d2F5eF61406D9d637A9;
+		_treasury = 0x6B51c705d1E78DF8f92317130a0FC1DbbF780a5A;//change
 	}
 
 	function genesis(uint foundingFTM, address tkn, uint gen) public {
@@ -154,7 +153,7 @@ contract StakingContract {
 			}
 			eAmount = uint96(bytes12(epoch << 80)); toClaim = _computeRewards(lastClaim,eAmount,block.number,tknAmount,status);
 		}
-		I(0x6B51c705d1E78DF8f92317130a0FC1DbbF780a5A).getRewards(a, toClaim);
+		I(_treasury).getRewards(a, toClaim);
 	}
 
 	function _getRate(bool s,uint eEnd) internal view returns(uint){
@@ -204,7 +203,7 @@ contract StakingContract {
 			uint rate = _getRate(false, block.number);
 			rate = rate/2;
 			toClaim = blocks*_ls[a].amount*rate/totalLetLocked;
-			I(0x6B51c705d1E78DF8f92317130a0FC1DbbF780a5A).getRewards(a, toClaim);
+			I(_treasury).getRewards(a, toClaim);
 			_ls[msg.sender].lastClaim = uint32(block.number);
 		}
 		return toClaim;
