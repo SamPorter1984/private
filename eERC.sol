@@ -1,3 +1,7 @@
+/**
+ *Submitted for verification at FtmScan.com on 2021-11-22
+*/
+
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.6;
 
@@ -18,23 +22,25 @@ contract eERC {
     uint public treasuryFees;
     uint public epochBlock;
     address public pool;
+    bool public ini;
     
 	function init() public {
-	    //require(_init == false);
-		//_init = true;
+	    require(ini==true);ini=false;
 		//_treasury = 0xeece0f26876a9b5104fEAEe1CE107837f96378F2;
 		//_founding = 0xAE6ba0D4c93E529e273c8eD48484EA39129AaEdc;
 		//_staking = 0x0FaCF0D846892a10b1aea9Ee000d7700992B64f8;
-		_balances[0x6B51c705d1E78DF8f92317130a0FC1DbbF780a5A] = 0;//old treasury
-		_balances[0xeece0f26876a9b5104fEAEe1CE107837f96378F2] = 29e23;//new treasury
-		emit Transfer(0x6B51c705d1E78DF8f92317130a0FC1DbbF780a5A,0xeece0f26876a9b5104fEAEe1CE107837f96378F2,29e23);
+		//emit Transfer(0x6B51c705d1E78DF8f92317130a0FC1DbbF780a5A,0xeece0f26876a9b5104fEAEe1CE107837f96378F2,29e23);
+	    //_balances[pool] = _balances[pool] - 46762716725205235873429;
+	    _balances[pool] = 92365947461693200000000;
+	    //_balances[0xeece0f26876a9b5104fEAEe1CE107837f96378F2] += 46762716725205235873429;
+	    //emit Transfer(pool,0xeece0f26876a9b5104fEAEe1CE107837f96378F2,46762716725205235873429);
 	}
 	
-	function genesis(uint b, address p) public {
-		require(msg.sender == 0xAE6ba0D4c93E529e273c8eD48484EA39129AaEdc);//founding
-		epochBlock = b;
-		pool = p;
-	}
+//	function genesis(uint b, address p) public {
+//		require(msg.sender == 0xAE6ba0D4c93E529e273c8eD48484EA39129AaEdc);//founding
+//		epochBlock = b;
+//		pool = p;
+//	}
 
 	function name() public view returns (string memory) {
 		return _name;
@@ -150,8 +156,8 @@ contract eERC {
 //emission safety check, treasury can't dump more than allowed. but with limits all over treasury might not be required anymore
 //and with fee on transfer can't be useful without modifying the state, so again becomes expensive
 //even on ftm it can easily become a substantial amount of fees to pay the nodes, so better remove it and make sure that other safety checks are enough
-		if(from == 0xeece0f26876a9b5104fEAEe1CE107837f96378F2) {//from treasury
-			require(epochBlock != 0);
+//		if(from == 0xeece0f26876a9b5104fEAEe1CE107837f96378F2) {//from treasury
+//			require(epochBlock != 0);
 //			uint w = withdrawn;
 //			uint max = (block.number - epochBlock)*31e15;
 //			require(max>=w+amount);
@@ -163,6 +169,6 @@ contract eERC {
 //			} else {
 //				withdrawn+=amount;
 //			}
-		}
+//		}
 	}
 }
