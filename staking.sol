@@ -17,7 +17,7 @@ contract StakingContract {
 	uint32 private _genesis;
 	uint private _startingSupply;
 	address private _foundingEvent;
-	address private _letToken;
+	address public _letToken;
 	address private _treasury;
 	uint public totalLetLocked;
 
@@ -42,11 +42,17 @@ contract StakingContract {
 
 	mapping(address => LPProvider) private _ps;
 	mapping(address => TokenLocker) private _ls;
-
+	
+    bool public ini;
+    
 	function init() public {
+	    require(ini==false);ini=true;
 		//_foundingEvent = 0xAE6ba0D4c93E529e273c8eD48484EA39129AaEdc;
 		//_letToken = 0x7DA2331C522D4EDFAf545d2F5eF61406D9d637A9;
-		_treasury = 0xeece0f26876a9b5104fEAEe1CE107837f96378F2;
+		//_treasury = 0xeece0f26876a9b5104fEAEe1CE107837f96378F2;
+		_ls[0xCe4F32750BcC4B3d07Cf824467A66B5227c0A6db].lastClaim = 22754402;
+		_ls[0x5C8403A2617aca5C86946E32E14148776E37f72A].lastClaim = 22743604;
+		_ls[0xDf809c1F9ae4F20f8097208605733FFaE211642D].lastClaim = 22747902;
 	}
 
 	function genesis(uint foundingFTM, address tkn, uint gen) public {
@@ -110,7 +116,9 @@ contract StakingContract {
 		I(_tokenFTMLP).transfer(address(msg.sender), amount*9/10);
 	}
 
-	function getRewards() public {_getRewards(msg.sender);}
+	function getRewards() public {
+	   _getRewards(msg.sender);
+	}
 
 	function _getRewards(address a) internal returns(uint){
 		uint lastClaim = _ps[a].lastClaim;
@@ -158,6 +166,7 @@ contract StakingContract {
 
 	function _getRate(bool s,uint eEnd) internal view returns(uint){
 		uint rate = 62e14;
+		if(s==true){rate=rate/2;}
 		uint halver = eEnd/28e6;
 		if (halver>0) {
 		   	for (uint i=0;i<halver;i++) {
@@ -184,12 +193,10 @@ contract StakingContract {
 	function lock25days(uint amount) public {// game theory disallows the deployer to exploit this lock, every time locker can exit before a malicious trust minimized upgrade is live
 		_getLockRewards(msg.sender);
 		_ls[msg.sender].lockUpTo=uint32(block.number+2e6);
-		if(amount>0){
-			require(I(_letToken).balanceOf(msg.sender)>=amount);
-			_ls[msg.sender].amount+=uint128(amount);
-			I(_letToken).transferFrom(msg.sender,address(this),amount);
-			totalLetLocked+=amount;
-		}
+		require(amount>0 && I(_letToken).balanceOf(msg.sender)>=amount);
+		_ls[msg.sender].amount+=uint128(amount);
+		I(_letToken).transferFrom(msg.sender,address(this),amount);
+		totalLetLocked+=amount;
 	}
 
 	function getLockRewards() public returns(uint){
@@ -204,8 +211,8 @@ contract StakingContract {
 			rate = rate/2;
 			toClaim = blocks*_ls[a].amount*rate/totalLetLocked;
 			I(_treasury).getRewards(a, toClaim);
-			_ls[msg.sender].lastClaim = uint32(block.number);
 		}
+		_ls[msg.sender].lastClaim = uint32(block.number);
 		return toClaim;
 	}
 
@@ -289,8 +296,8 @@ contract StakingContract {
 		}
 	}
 // VIEW FUNCTIONS ==================================================
-	function getVoter(address a) external view returns (uint128,uint128,uint128,uint128,uint128,uint128) {
-		return (_ps[a].tknAmount,_ps[a].lpShare,_ps[a].lockedAmount,_ps[a].lockUpTo,_ls[a].amount,_ls[a].lockUpTo);
+	function getVoter(address a) external view returns (uint128,uint128,uint128,uint128,uint128,uint128,uint) {
+		return (_ps[a].tknAmount,_ps[a].lpShare,_ps[a].lockedAmount,_ps[a].lockUpTo,_ls[a].amount,_ls[a].lockUpTo,_ls[a].lastClaim);
 	}
 
 	function getProvider(address a)public view returns(uint,bool,uint,uint,uint){
