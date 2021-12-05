@@ -46,13 +46,13 @@ contract StakingContract {
     bool public ini;
     
 	function init() public {
-	    require(ini==false);ini=true;
+	    require(ini==true);ini=false;
 		//_foundingEvent = 0xAE6ba0D4c93E529e273c8eD48484EA39129AaEdc;
 		//_letToken = 0x7DA2331C522D4EDFAf545d2F5eF61406D9d637A9;
 		//_treasury = 0xeece0f26876a9b5104fEAEe1CE107837f96378F2;
-		_ls[0xCe4F32750BcC4B3d07Cf824467A66B5227c0A6db].lastClaim = 22754402;
-		_ls[0x5C8403A2617aca5C86946E32E14148776E37f72A].lastClaim = 22743604;
-		_ls[0xDf809c1F9ae4F20f8097208605733FFaE211642D].lastClaim = 22747902;
+		//_ls[0xCe4F32750BcC4B3d07Cf824467A66B5227c0A6db].lastClaim = 22754402;
+		//_ls[0x5C8403A2617aca5C86946E32E14148776E37f72A].lastClaim = 22743604;
+		//_ls[0xDf809c1F9ae4F20f8097208605733FFaE211642D].lastClaim = 22747902;
 	}
 
 	function genesis(uint foundingFTM, address tkn, uint gen) public {
@@ -99,9 +99,10 @@ contract StakingContract {
 		if (status == true) {
 			length = _founderEpochs.length;
 			epoch = _founderEpochs[length-1];
-		} else{
+		} else {
 			length = _epochs.length;
 			epoch = _epochs[length-1];
+			//if(notFoundersLP>=amount){notFoundersLP-=amount;} else {notFoundersLP=0;}
 		}
 		(uint80 eBlock,uint96 eAmount,) = _extractEpoch(epoch);
 		eAmount -= uint96(toSubtract);
@@ -236,7 +237,7 @@ contract StakingContract {
 		address tkn = _tokenFTMLP;
 		uint length = _epochs.length;
 		uint lastClaim = _ps[msg.sender].lastClaim;
-		require(_ps[msg.sender].founder==false && I(tkn).balanceOf(msg.sender)>=amount);
+		require(I(_foundingEvent).deposits(msg.sender)==0 && I(tkn).balanceOf(msg.sender)>=amount);
 		I(tkn).transferFrom(msg.sender,address(this),amount);
 		if(lastClaim==0){
 			_ps[msg.sender].lastClaim = uint32(block.number);
@@ -254,6 +255,7 @@ contract StakingContract {
 		_ps[msg.sender].lpShare += uint128(amount);
 		_ps[msg.sender].lockedAmount += uint128(amount);
 		_ps[msg.sender].lockUpTo = uint128(block.number+2e6);
+	//	notFoundersLP+=amount;
 	}
 
 	function _extractEpoch(bytes32 epoch) internal pure returns (uint80,uint96,uint80){
